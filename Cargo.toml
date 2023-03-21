@@ -1,0 +1,10 @@
+[package]
+name = "sudoku-solver"
+version = "1.0.0"
+authors = ["cameron <hello@wzid.dev>"]
+edition = "2021"
+description = "Program to solve sudoku board"
+
+[dependencies]
+eframe = "0.21.0"
+catppuccin-egui = "2.0"
