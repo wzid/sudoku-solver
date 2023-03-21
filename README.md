@@ -33,7 +33,7 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
 ```
 `key` is calculated by left-shifting the binary value of 1 by a value between 0 and 8, depending on the digit in the cell
 ```rust
-                let key = 1 << grid[r][c].value.chars().next().unwrap() as usize - '1' as usize;
+            let key = 1 << grid[r][c].value.chars().next().unwrap() as usize - '1' as usize;
 ```
 
 `key` is then used to update the corresponding bit in the bit fields
