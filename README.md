@@ -1,7 +1,6 @@
 # sudoku-solver
 
-## [Download](https://github.com/wzid/sudoku-solver/releases/latest/download/sudoku-solver")
-<br>
+### [Download](https://github.com/wzid/sudoku-solver/releases/latest/download/sudoku-solver)
 
 ![sudoku gif](assets/sudoku.gif)
 
