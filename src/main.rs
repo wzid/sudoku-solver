@@ -14,7 +14,7 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "sudoku solver",
         options,
-        Box::new(|_cc| Box::new(MyApp::default())),
+        Box::new(|_cc| Box::<MyApp>::default()),
     )
 }
 
@@ -28,7 +28,7 @@ impl Default for MyApp {
     fn default() -> Self {
         Self {
             theme: catppuccin_egui::MACCHIATO,
-            grid: vec![vec![Square::new(); 9]; 9],
+            grid: vec![vec![Square::default(); 9]; 9],
             error_message: String::new()
         }
     }
@@ -56,7 +56,7 @@ impl eframe::App for MyApp {
         // Set the theme for the UI using the catppuccin crate
         catppuccin_egui::set_theme(ctx, self.theme.clone());
 
-        TopBottomPanel::top("Top panel???").show(&ctx, |ui| {
+        TopBottomPanel::top("Top panel???").show(ctx, |ui| {
             ui.label(RichText::new("sudoku solver").size(25.0));
 
             ui.add_space(5.0);
@@ -65,7 +65,7 @@ impl eframe::App for MyApp {
                 ui.label("Theme");
                 // ComboBox for the different themes
                 ComboBox::from_id_source("Theme")
-                    .selected_text(format!("{}", self.theme.get_name()))
+                    .selected_text(self.theme.get_name())
                     .show_ui(ui, |ui| {
                         ui.selectable_value(&mut self.theme, catppuccin_egui::MACCHIATO, "Macchiato");
                         ui.selectable_value(&mut self.theme, catppuccin_egui::FRAPPE, "Frappe");
@@ -143,7 +143,7 @@ impl eframe::App for MyApp {
             ui.add_space(5.0);
         });
 
-        CentralPanel::default().show(&ctx, |ui| {
+        CentralPanel::default().show(ctx, |ui| {
             let square_size = 55.0;
 
             // 9 squares of square size and 3 spaces of 2.0 width
@@ -158,7 +158,7 @@ impl eframe::App for MyApp {
             );
 
             // This is going to be our position that we continually update as we move through the grid
-            let mut pos = Pos2::from(initial_position);
+            let mut pos = initial_position;
 
             //Grid
             ui.horizontal_wrapped(|ui| {
@@ -257,7 +257,7 @@ impl eframe::App for MyApp {
                                     // TODO: Remove `square.value.len() > 1` once https://github.com/emilk/egui/pull/2816 is accepted
                                     if self.grid[i][j].value.len() > 1 {
                                         self.grid[i][j].value = first_char.to_string();
-                                    } else if !first_char.is_digit(10) || first_char == '0' {
+                                    } else if !first_char.is_ascii_digit() || first_char == '0' {
                                         self.grid[i][j].value.clear();
                                     }
                                 }

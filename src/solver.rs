@@ -1,7 +1,7 @@
 use crate::square::Square;
 use std::cmp::Ordering;
 
-pub fn verify_grid(grid: &Vec<Vec<Square>>) -> bool {
+pub fn verify_grid(grid: &[Vec<Square>]) -> bool {
     let mut row: u128 = 0;
     let mut col: u128 = 0;
     let mut boxes: u128 = 0;
@@ -17,13 +17,13 @@ pub fn verify_grid(grid: &Vec<Vec<Square>>) -> bool {
 
             let key = grid[i][j].value.chars().next().unwrap() as usize - '1' as usize;
 
-            let key_row = 1 << i * 9 + key;
-            let key_col = 1 << j * 9 + key;
+            let key_row = 1 << (i * 9 + key);
+            let key_col = 1 << (j * 9 + key);
 
             // i / 3 is integer division
             // We get the starting row index of the box (i / 3 * 3)
             // Then we get the starting column (j / 3)
-            let key_boxes = 1 << (i / 3 * 3 + j / 3) * 9 + key;
+            let key_boxes = 1 << ((i / 3 * 3 + j / 3) * 9 + key);
 
             // Check if corresponding bits are already set
             if row & key_row | col & key_col | boxes & key_boxes != 0 {
@@ -58,12 +58,12 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
         for c in 0..9 {
             if !grid[r][c].value.is_empty() {
                 // Calculated by left-shifting 1 by a value between 0 and 8, depending on the digit in the cell
-                let key = 1 << grid[r][c].value.chars().next().unwrap() as usize - '1' as usize;
+                let key = 1 << (grid[r][c].value.chars().next().unwrap() as usize - '1' as usize);
 
                 // The key value is then used to update the corresponding bit in the bit fields
-                row |= key << r * 9;
-                col |= key << c * 9;
-                boxes |= key << (r / 3 * 3 + c / 3) * 9;
+                row |= key << (r * 9);
+                col |= key << (c * 9);
+                boxes |= key << ((r / 3 * 3 + c / 3) * 9);
             }
         }
     }
@@ -134,7 +134,7 @@ fn solve(
 
     // This is a bit mask that represents the numbers that are already present
     // We shift to the right to align each bits with the corresponding row, column, and box
-    let mask = (*row >> r * 9) | (*col >> c * 9) | (*boxes >> b * 9);
+    let mask = (*row >> (r * 9)) | (*col >> (c * 9)) | (*boxes >> (b * 9));
 
     for x in 0..9 {
         // Move the bit that 1 has to the xth bit and then check it
@@ -145,9 +145,9 @@ fn solve(
         }
 
         // We update the bit at the current x value using xmask
-        *row |= xmask << r * 9;
-        *col |= xmask << c * 9;
-        *boxes |= xmask << b * 9;
+        *row |= xmask << (r * 9);
+        *col |= xmask << (c * 9);
+        *boxes |= xmask << (b * 9);
 
         // Since its 0-8 then we do x+1
         grid[r][c].value = std::char::from_digit(x + 1, 10).unwrap().to_string();
@@ -158,9 +158,9 @@ fn solve(
         }
 
         // If it didnt work then we reset the changes we did to the bit fields
-        *row ^= xmask << r * 9;
-        *col ^= xmask << c * 9;
-        *boxes ^= xmask << b * 9;
+        *row ^= xmask << (r * 9);
+        *col ^= xmask << (c * 9);
+        *boxes ^= xmask << (b * 9);
 
         grid[r][c].value = String::new();
         grid[r][c].solved_cell = false;
