@@ -1,9 +1,7 @@
 use eframe::egui::*;
 
 pub mod solver;
-pub mod square;
 use solver::*;
-use square::Square;
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
@@ -20,7 +18,7 @@ fn main() -> eframe::Result<()> {
 
 struct MyApp {
     theme: catppuccin_egui::Theme,
-    grid: Vec<Vec<Square>>,
+    grid: SGrid,
     error_message: String,
 }
 
@@ -28,7 +26,7 @@ impl Default for MyApp {
     fn default() -> Self {
         Self {
             theme: catppuccin_egui::MACCHIATO,
-            grid: vec![vec![Square::default(); 9]; 9],
+            grid: SGrid::default(),
             error_message: String::new(),
         }
     }
@@ -159,7 +157,7 @@ impl eframe::App for MyApp {
             // This is going to be our position that we continually update as we move through the grid
             let mut pos = initial_position;
 
-            //Grid
+            //SGrid
             ui.horizontal_wrapped(|ui| {
                 for i in 0..9 {
                     for j in 0..9 {

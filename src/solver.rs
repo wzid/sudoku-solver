@@ -1,21 +1,30 @@
-use crate::square::Square;
 use std::cmp::Ordering;
 
-pub fn verify_grid(grid: &[Vec<Square>]) -> bool {
+#[derive(Clone, Default)]
+pub struct Square {
+    pub value: String,
+    pub show_text: bool,
+    pub solved_cell: bool,
+    pub focus: bool,
+}
+
+pub type SGrid = [[Square; 9]; 9];
+
+pub fn verify_grid(grid: &SGrid) -> bool {
     let mut row: u128 = 0;
     let mut col: u128 = 0;
     let mut boxes: u128 = 0;
 
     let mut cells = 0;
-    for i in 0..9 {
-        for j in 0..9 {
-            if grid[i][j].value.is_empty() {
+    for (i, srow) in grid.iter().enumerate() {
+        for (j, cell) in srow.iter().enumerate() {
+            if cell.value.is_empty() {
                 continue;
             }
 
             cells += 1;
 
-            let key = grid[i][j].value.chars().next().unwrap() as usize - '1' as usize;
+            let key = cell.value.chars().next().unwrap() as usize - '1' as usize;
 
             let key_row = 1 << (i * 9 + key);
             let key_col = 1 << (j * 9 + key);
@@ -48,17 +57,17 @@ pub enum SolveResult {
     Invalid,
 }
 
-pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
+pub fn solve_grid(grid: &mut SGrid) -> SolveResult {
     // These are the bit fields that keep track of the numbers placed in each row, column, and box of the grid
     let mut row: u128 = 0;
     let mut col: u128 = 0;
     let mut boxes: u128 = 0;
 
-    for r in 0..9 {
-        for c in 0..9 {
-            if !grid[r][c].value.is_empty() {
+    for (r, srow) in grid.iter().enumerate() {
+        for (c, cell) in srow.iter().enumerate() {
+            if !cell.value.is_empty() {
                 // Calculated by left-shifting 1 by a value between 0 and 8, depending on the digit in the cell
-                let key = 1 << (grid[r][c].value.chars().next().unwrap() as usize - '1' as usize);
+                let key = 1 << (cell.value.chars().next().unwrap() as usize - '1' as usize);
 
                 // The key value is then used to update the corresponding bit in the bit fields
                 row |= key << (r * 9);
@@ -73,7 +82,7 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
 
     // We keep a solved_grid because we make sure that there is not a 2nd solution to the puzzle
     // If another solution doesn't exits then we set the grid equal to the solved_grid
-    let mut solved_grid: Vec<Vec<Square>> = Vec::new();
+    let mut solved_grid: SGrid = SGrid::default();
 
     // Call the solving method recursively
     solve(
@@ -103,8 +112,8 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
 }
 
 fn solve(
-    solved_grid: &mut Vec<Vec<Square>>,
-    grid: &mut Vec<Vec<Square>>,
+    solved_grid: &mut SGrid,
+    grid: &mut SGrid,
     row: &mut u128,
     col: &mut u128,
     boxes: &mut u128,
