@@ -1,9 +1,9 @@
 use eframe::egui::*;
 
-pub mod square;
 pub mod solver;
-use square::Square;
+pub mod square;
 use solver::*;
+use square::Square;
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
@@ -21,7 +21,7 @@ fn main() -> eframe::Result<()> {
 struct MyApp {
     theme: catppuccin_egui::Theme,
     grid: Vec<Vec<Square>>,
-    error_message: String
+    error_message: String,
 }
 
 impl Default for MyApp {
@@ -29,11 +29,10 @@ impl Default for MyApp {
         Self {
             theme: catppuccin_egui::MACCHIATO,
             grid: vec![vec![Square::default(); 9]; 9],
-            error_message: String::new()
+            error_message: String::new(),
         }
     }
 }
-
 
 trait ThemeName {
     fn get_name(&self) -> String;
@@ -60,41 +59,43 @@ impl eframe::App for MyApp {
             ui.label(RichText::new("sudoku solver").size(25.0));
 
             ui.add_space(5.0);
-            
+
             ui.horizontal(|ui| {
                 ui.label("Theme");
                 // ComboBox for the different themes
                 ComboBox::from_id_source("Theme")
                     .selected_text(self.theme.get_name())
                     .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut self.theme, catppuccin_egui::MACCHIATO, "Macchiato");
+                        ui.selectable_value(
+                            &mut self.theme,
+                            catppuccin_egui::MACCHIATO,
+                            "Macchiato",
+                        );
                         ui.selectable_value(&mut self.theme, catppuccin_egui::FRAPPE, "Frappe");
                         ui.selectable_value(&mut self.theme, catppuccin_egui::MOCHA, "Mocha");
                     });
-                              
+
                 let solve_response = ui.add(
                     Button::new(RichText::new("Solve").color(self.theme.mantle))
                         .fill(self.theme.text)
-                        .stroke(Stroke::NONE)
+                        .stroke(Stroke::NONE),
                 );
-                
+
                 if solve_response.clicked() {
                     // Verify it is a valid sudoku board
                     if verify_grid(&self.grid) {
-                        
                         // Set the error message based on the result of `solve_grid`
                         match solve_grid(&mut self.grid) {
                             SolveResult::Unique => {
                                 self.error_message = String::new();
-                            },
+                            }
                             SolveResult::Invalid => {
                                 self.error_message = "No valid solutions".to_string();
-                            },
+                            }
                             SolveResult::NotUnique => {
                                 self.error_message = "Solution is not unique".to_string();
-                            },
+                            }
                         }
-
                     } else {
                         self.error_message = "Invalid board!".to_string();
                     }
@@ -103,7 +104,7 @@ impl eframe::App for MyApp {
                 let reset_response = ui.add(
                     Button::new(RichText::new("Reset").color(self.theme.mantle))
                         .fill(self.theme.text)
-                        .stroke(Stroke::NONE)
+                        .stroke(Stroke::NONE),
                 );
 
                 // If you just clicked the reset button then it will reset the solved cells
@@ -131,15 +132,13 @@ impl eframe::App for MyApp {
                         }
                     }
                 }
-                
+
                 // Put the error message next to the buttons
                 if !self.error_message.is_empty() {
                     ui.label(RichText::new(&self.error_message).color(self.theme.red));
                 }
-
-                
             });
-            
+
             ui.add_space(5.0);
         });
 
@@ -178,13 +177,12 @@ impl eframe::App for MyApp {
                             // Checkerboard style color and alt color for solved cells
                             if self.grid[i][j].solved_cell {
                                 self.theme.crust
-                            }else if (i + j) % 2 == 0 {
+                            } else if (i + j) % 2 == 0 {
                                 self.theme.surface1
                             } else {
                                 self.theme.surface2
                             },
                         );
-                        
 
                         if self.grid[i][j].show_text || self.grid[i][j].solved_cell {
                             ui.allocate_ui_at_rect(rect, |ui| {
@@ -195,12 +193,14 @@ impl eframe::App for MyApp {
                                     .frame(false)
                                     .horizontal_align(Align::Center);
 
+                                let text_response =
+                                    ui.centered_and_justified(|ui| ui.add(text_edit)).inner;
 
-                                let text_response = ui.centered_and_justified(|ui| ui.add(text_edit)).inner;
-                                    
                                 if text_response.has_focus() {
                                     // Here we go through and check to see if the user has pressed any of the arrow keys and then change the focus of which cell they are on
-                                    if ui.input_mut(|inp| inp.consume_key(Modifiers::NONE, Key::ArrowDown)) {
+                                    if ui.input_mut(|inp| {
+                                        inp.consume_key(Modifiers::NONE, Key::ArrowDown)
+                                    }) {
                                         text_response.surrender_focus();
                                         let row_down = (i + 1) % 9;
                                         self.grid[i][j].focus = false;
@@ -208,7 +208,9 @@ impl eframe::App for MyApp {
                                         self.grid[row_down][j].show_text = true;
                                     }
 
-                                    if ui.input_mut(|inp| inp.consume_key(Modifiers::NONE, Key::ArrowUp)) {
+                                    if ui.input_mut(|inp| {
+                                        inp.consume_key(Modifiers::NONE, Key::ArrowUp)
+                                    }) {
                                         text_response.surrender_focus();
                                         // Prevent subtract with overflow error
                                         let row_up = (9 + i - 1) % 9;
@@ -217,7 +219,9 @@ impl eframe::App for MyApp {
                                         self.grid[row_up][j].show_text = true;
                                     }
 
-                                    if ui.input_mut(|inp| inp.consume_key(Modifiers::NONE, Key::ArrowLeft)) {
+                                    if ui.input_mut(|inp| {
+                                        inp.consume_key(Modifiers::NONE, Key::ArrowLeft)
+                                    }) {
                                         text_response.surrender_focus();
                                         // Prevent subtract with overflow error
                                         let col_left = (9 + j - 1) % 9;
@@ -226,7 +230,9 @@ impl eframe::App for MyApp {
                                         self.grid[i][col_left].show_text = true;
                                     }
 
-                                    if ui.input_mut(|inp| inp.consume_key(Modifiers::NONE, Key::ArrowRight)) {
+                                    if ui.input_mut(|inp| {
+                                        inp.consume_key(Modifiers::NONE, Key::ArrowRight)
+                                    }) {
                                         text_response.surrender_focus();
                                         let col_right = (j + 1) % 9;
                                         self.grid[i][j].focus = false;
@@ -234,7 +240,7 @@ impl eframe::App for MyApp {
                                         self.grid[i][col_right].show_text = true;
                                     }
                                 }
-                                
+
                                 // Make sure to keep requesting focus until you have it
                                 if text_response.has_focus() && self.grid[i][j].focus {
                                     self.grid[i][j].focus = false;
@@ -245,13 +251,15 @@ impl eframe::App for MyApp {
                                 if response.clicked() || self.grid[i][j].focus {
                                     text_response.request_focus();
                                 }
-                                
+
                                 // If you do not have focus and the value is empty then do not show anymore
-                                if !text_response.has_focus() && self.grid[i][j].value.is_empty() && !self.grid[i][j].focus {
+                                if !text_response.has_focus()
+                                    && self.grid[i][j].value.is_empty()
+                                    && !self.grid[i][j].focus
+                                {
                                     self.grid[i][j].show_text = false;
                                 }
-                                
-                                
+
                                 // This makes sure that we both limit the length of the input and make sure its a number 1-9 inclusive
                                 if let Some(first_char) = self.grid[i][j].value.chars().next() {
                                     // TODO: Remove `square.value.len() > 1` once https://github.com/emilk/egui/pull/2816 is accepted
@@ -261,10 +269,9 @@ impl eframe::App for MyApp {
                                         self.grid[i][j].value.clear();
                                     }
                                 }
-                                
                             });
                         }
-                        
+
                         pos.x += square_size;
 
                         // This is for the horizontal spacing for each 3x3 Cube

@@ -68,7 +68,6 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
         }
     }
 
-    
     let mut count = 0;
     let old_grid = grid.clone();
 
@@ -77,13 +76,21 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
     let mut solved_grid: Vec<Vec<Square>> = Vec::new();
 
     // Call the solving method recursively
-    solve(&mut solved_grid, grid, &mut row, &mut col, &mut boxes, 0, &mut count);
+    solve(
+        &mut solved_grid,
+        grid,
+        &mut row,
+        &mut col,
+        &mut boxes,
+        0,
+        &mut count,
+    );
 
     match count.cmp(&1) {
         Ordering::Equal => {
             *grid = solved_grid;
             SolveResult::Unique
-        },
+        }
         Ordering::Greater => {
             *grid = old_grid;
             SolveResult::NotUnique
@@ -96,7 +103,7 @@ pub fn solve_grid(grid: &mut Vec<Vec<Square>>) -> SolveResult {
 }
 
 fn solve(
-    solved_grid: &mut Vec<Vec<Square>>, 
+    solved_grid: &mut Vec<Vec<Square>>,
     grid: &mut Vec<Vec<Square>>,
     row: &mut u128,
     col: &mut u128,
@@ -120,7 +127,6 @@ fn solve(
         return false;
     }
 
-    
     // Get the index of the row and column
     let (r, c) = (i / 9, i % 9);
 
@@ -138,7 +144,7 @@ fn solve(
 
     for x in 0..9 {
         // Move the bit that 1 has to the xth bit and then check it
-        // to make sure that the bit has not already been set 
+        // to make sure that the bit has not already been set
         let xmask = 1 << x;
         if mask & xmask != 0 {
             continue;
@@ -165,6 +171,6 @@ fn solve(
         grid[r][c].value = String::new();
         grid[r][c].solved_cell = false;
     }
-    
+
     false
 }
