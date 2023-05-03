@@ -1,3 +1,5 @@
 /target
 .DS_STORE
 /assets/.DS_STORE
+/.vscode
+/dist

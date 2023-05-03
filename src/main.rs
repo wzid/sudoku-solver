@@ -3,6 +3,7 @@ use eframe::egui::*;
 pub mod solver;
 use solver::*;
 
+#[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         initial_window_size: Some(vec2(800.0, 625.0)),
@@ -15,6 +16,29 @@ fn main() -> eframe::Result<()> {
         Box::new(|_cc| Box::<MyApp>::default()),
     )
 }
+
+// when compiling to web using trunk.
+#[cfg(target_arch = "wasm32")]
+fn main() {
+    // Make sure panics are logged using `console.error`.
+    console_error_panic_hook::set_once();
+
+    // Redirect tracing to console.log and friends:
+    tracing_wasm::set_as_global_default();
+
+    let web_options = eframe::WebOptions::default();
+
+    wasm_bindgen_futures::spawn_local(async {
+        eframe::start_web(
+            "the_canvas_id", // hardcode it
+            web_options,
+            Box::new(|_cc| Box::<MyApp>::default()),
+        )
+        .await
+        .expect("failed to start eframe");
+    });
+}
+
 
 struct MyApp {
     theme: catppuccin_egui::Theme,
@@ -56,10 +80,11 @@ impl eframe::App for MyApp {
         TopBottomPanel::top("Top panel???").show(ctx, |ui| {
             ui.label(RichText::new("sudoku solver").size(25.0));
 
-            ui.add_space(5.0);
+            ui.add_space(10.0);
 
             ui.horizontal(|ui| {
-                ui.label("Theme");
+                ui.label(RichText::new("Theme").size(15.0));
+                
                 // ComboBox for the different themes
                 ComboBox::from_id_source("Theme")
                     .selected_text(self.theme.get_name())
@@ -73,8 +98,8 @@ impl eframe::App for MyApp {
                         ui.selectable_value(&mut self.theme, catppuccin_egui::MOCHA, "Mocha");
                     });
 
-                let solve_response = ui.add(
-                    Button::new(RichText::new("Solve").color(self.theme.mantle))
+                let solve_response = ui.add_sized([50.0, 20.0],
+                    Button::new(RichText::new("Solve").size(15.0).color(self.theme.mantle))
                         .fill(self.theme.text)
                         .stroke(Stroke::NONE),
                 );
@@ -99,8 +124,8 @@ impl eframe::App for MyApp {
                     }
                 }
 
-                let reset_response = ui.add(
-                    Button::new(RichText::new("Reset").color(self.theme.mantle))
+                let reset_response = ui.add_sized([50.0, 20.0],
+                    Button::new(RichText::new("Reset").size(15.0).color(self.theme.mantle))
                         .fill(self.theme.text)
                         .stroke(Stroke::NONE),
                 );
@@ -141,7 +166,7 @@ impl eframe::App for MyApp {
         });
 
         CentralPanel::default().show(ctx, |ui| {
-            let square_size = 55.0;
+            let square_size = (ui.available_height() / 9.0) - 10.0;
 
             // 9 squares of square size and 3 spaces of 2.0 width
             let adjust = ((9.0 * square_size) + 9.0) / 2.0;
