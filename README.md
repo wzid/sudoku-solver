@@ -1,6 +1,4 @@
-# sudoku-solver
-
-### [Download](https://github.com/wzid/sudoku-solver/releases/latest/download/sudoku-solver)
+# sudoku-solver - [Website](https://projects.cameron.rs/sudoku-solver)
 
 ![sudoku gif](assets/sudoku.gif)
 
